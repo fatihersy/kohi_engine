@@ -4,10 +4,13 @@
 
 #include "core/logger.h"
 #include "core/input.h"
+#include "core/event.h"
+
 #include "containers/darray.h"
 
 #include <windows.h>
 #include <windowsx.h>
+#include <stdlib.h>
 
 // For surface creation
 #include <vulkan/vulkan.h>
@@ -182,7 +185,7 @@ void platform_get_required_extension_names(const char*** names_darray) {
 
 b8 platform_create_vulkan_surface(struct platform_state* plat_state, struct vulkan_context* context) {
     // Simply cold-cast to the known type.
-    internal_state *state = (internal_state *)plat_state->internal_state;
+    internal_state* state = (internal_state*)plat_state->internal_state;
 
     VkWin32SurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};
     create_info.hinstance = state->h_instance;
@@ -214,12 +217,17 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARA
         case WM_DESTROY:
             PostQuitMessage(0);
         case WM_SIZE: {
-            // RECT r;
-            // GetClientRect(hwnd, &r);
-            // u32 width = r.right - r.left;
-            // u32 height = r.bottom - r.top;
+            RECT r;
+            GetClientRect(hwnd, &r);
+            u32 width = r.right - r.left;
+            u32 height = r.bottom - r.top;
 
-            // TODO: Fire an event for window resize.
+            // Fire the event. The application layer should pick this up, but not handle it
+            // as it shouldn be visible to other parts of the application.
+            event_context context;
+            context.data.u16[0] = (u16)width;
+            context.data.u16[1] = (u16)height;
+            event_fire(EVENT_CODE_RESIZED, 0, context);
         } break;
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:

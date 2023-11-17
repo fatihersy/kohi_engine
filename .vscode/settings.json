@@ -53,5 +53,6 @@
         "utility": "cpp",
         "kmemory.h": "c",
         "defines.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
