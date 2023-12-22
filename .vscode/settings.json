@@ -1,16 +1,11 @@
 {
     "workbench.iconTheme": "material-icon-theme",
-    "workbench.colorTheme": "Gruvbox Dark Hard",
+    "workbench.colorTheme": "Monokai Dimmed",
     "editor.minimap.enabled": false,
     "editor.fontFamily": "IBM Plex Mono",
     "terminal.integrated.fontFamily": "IBM Plex Mono",
     "workbench.editor.showTabs": "multiple",
     "files.autoSave": "onFocusChange",
-    "workbench.colorCustomizations": {
-        "editorCursor.foreground": "#fffb00",
-        "editor.lineHighlightBackground": "#111144",
-        "editor.foreground": "#ffffff"
-    },
     "workbench.statusBar.visible": true,
     "editor.lineNumbers": "on",
     "C_Cpp.clang_format_style": "{ BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 0, NamespaceIndentation: All}",
