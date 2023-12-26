@@ -7,13 +7,29 @@
 #include <string.h>
 #include <stdarg.h>
 
-b8 initialize_logging() {
+typedef struct logger_system_state {
+    b8 initialized;
+} logger_system_state;
+
+static logger_system_state* state_ptr;
+
+b8 initialize_logging(u64* memory_requirement, void* state) {
+    *memory_requirement = sizeof(logger_system_state);
+    if (state == 0) {
+        return true;
+    }
+
+    state_ptr = state;
+    state_ptr->initialized = true;
+
     // TODO: create log file.
-    return TRUE;
+    return true;
 }
 
-void shutdown_logging(){
+void shutdown_logging() {
     // TODO: cleanup logging/writing queued entries.
+    state_ptr = 0;
+
 }
 
 KAPI void log_output(log_level level, const char* message, ...) {
@@ -39,15 +55,11 @@ KAPI void log_output(log_level level, const char* message, ...) {
     sprintf(out_message2, "%s%s\n", level_strings[level], out_message);
 
     // platform-specific output.
-    if (is_error)
-    {
+    if (is_error) {
         platform_console_write_error(out_message2, level);
-    }
-    else
-    {
+    } else {
         platform_console_write(out_message2, level);
     }
-    
 }
 
 void report_assertion_failure(const char* expression, const char* message, const char* file, i32 line) {

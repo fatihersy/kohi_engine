@@ -3,44 +3,39 @@
 #include "core/kmemory.h"
 #include "core/logger.h"
 
-typedef struct keyboard_state
-{
+typedef struct keyboard_state {
     b8 keys[256];
-}keyboard_state;
+} keyboard_state;
 
-typedef struct mouse_state
-{
+typedef struct mouse_state {
     i16 x;
     i16 y;
     u8 buttons[BUTTON_MAX_BUTTONS];
-}mouse_state;
+} mouse_state;
 
-typedef struct input_state
-{
+typedef struct input_state {
     keyboard_state keyboard_current;
     keyboard_state keyboard_previous;
     mouse_state mouse_current;
     mouse_state mouse_previous;
-}input_state;
+} input_state;
 
-static b8 initialized = FALSE;
+static b8 initialized = false;
 static input_state state = {};
 
 void initialize_input() {
     kzero_memory(&state, sizeof(input_state));
-    initialized = TRUE;
+    initialized = true;
     KINFO("Input subsystem initialized.");
 }
 
 void input_shutdown() {
     // TODO: Add shutdown routines when needed.
-    initialized = FALSE;
+    initialized = false;
 }
 
-void input_update(f64 delta_time) 
-{
-    if (!initialized)
-    {
+void input_update(f64 delta_time) {
+    if (!initialized) {
         return;
     }
 
@@ -49,11 +44,26 @@ void input_update(f64 delta_time)
     kcopy_memory(&state.mouse_previous, &state.mouse_current, sizeof(mouse_state));
 }
 
-void input_process_key(keys key, b8 pressed)
-{
+void input_process_key(keys key, b8 pressed) {
+    
+    if (key == KEY_LALT) {
+        KINFO("Left alt pressed");
+    } else if (key == KEY_RALT) {
+        KINFO("Right alt pressed");
+    }
+    if (key == KEY_LSHIFT) {
+        KINFO("Left shift pressed");
+    } else if (key == KEY_RSHIFT) {
+        KINFO("Right shift pressed");
+    }
+    if (key == KEY_LCONTROL) {
+        KINFO("Left control pressed");
+    } else if (key == KEY_RCONTROL) {
+        KINFO("Right control pressed");
+    }
+
     // Only handle this if the state actually changed.
-    if (state.keyboard_current.keys[key] != pressed)
-    {
+    if (state.keyboard_current.keys[key] != pressed) {
         // Update internal state.
         state.keyboard_current.keys[key] = pressed;
 
@@ -62,7 +72,6 @@ void input_process_key(keys key, b8 pressed)
         context.data.u16[0] = key;
         event_fire(pressed ? EVENT_CODE_KEY_PRESSED : EVENT_CODE_KEY_RELEASED, 0, context);
     }
-    
 }
 
 void input_process_button(buttons button, b8 pressed) {
@@ -81,7 +90,7 @@ void input_process_mouse_move(i16 x, i16 y) {
     // Only process if actually different
     if (state.mouse_current.x != x || state.mouse_current.y != y) {
         // NOTE: Enable this if debugging.
-        //KDEBUG("Mouse pos: %i, %i!", x, y);
+        // KDEBUG("Mouse pos: %i, %i!", x, y);
 
         // Update internal state.
         state.mouse_current.x = x;
@@ -106,59 +115,59 @@ void input_process_mouse_wheel(i8 z_delta) {
 
 b8 input_is_key_down(keys key) {
     if (!initialized) {
-        return FALSE;
+        return false;
     }
-    return state.keyboard_current.keys[key] == TRUE;
+    return state.keyboard_current.keys[key] == true;
 }
 
 b8 input_is_key_up(keys key) {
     if (!initialized) {
-        return TRUE;
+        return true;
     }
-    return state.keyboard_current.keys[key] == FALSE;
+    return state.keyboard_current.keys[key] == false;
 }
 
 b8 input_was_key_down(keys key) {
     if (!initialized) {
-        return FALSE;
+        return false;
     }
-    return state.keyboard_previous.keys[key] == TRUE;
+    return state.keyboard_previous.keys[key] == true;
 }
 
 b8 input_was_key_up(keys key) {
     if (!initialized) {
-        return TRUE;
+        return true;
     }
-    return state.keyboard_previous.keys[key] == FALSE;
+    return state.keyboard_previous.keys[key] == false;
 }
 
 // mouse input
 b8 input_is_button_down(buttons button) {
     if (!initialized) {
-        return FALSE;
+        return false;
     }
-    return state.mouse_current.buttons[button] == TRUE;
+    return state.mouse_current.buttons[button] == true;
 }
 
 b8 input_is_button_up(buttons button) {
     if (!initialized) {
-        return TRUE;
+        return true;
     }
-    return state.mouse_current.buttons[button] == FALSE;
+    return state.mouse_current.buttons[button] == false;
 }
 
 b8 input_was_button_down(buttons button) {
     if (!initialized) {
-        return FALSE;
+        return false;
     }
-    return state.mouse_previous.buttons[button] == TRUE;
+    return state.mouse_previous.buttons[button] == true;
 }
 
 b8 input_was_button_up(buttons button) {
     if (!initialized) {
-        return TRUE;
+        return true;
     }
-    return state.mouse_previous.buttons[button] == FALSE;
+    return state.mouse_previous.buttons[button] == false;
 }
 
 void input_get_mouse_position(i32* x, i32* y) {

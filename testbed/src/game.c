@@ -2,20 +2,31 @@
 
 #include <core/logger.h>
 
+#include <core/kmemory.h>
+#include <core/input.h>
+
 b8 game_initialize(game* game_inst) 
 {
     KDEBUG("game_initialize() called!");
-    return TRUE;
+    return true;
 }
 
 b8 game_update(game* game_inst, f32 delta_time) 
 {
-    return TRUE;
+    static u64 alloc_count = 0;
+    alloc_count = get_memory_alloc_count();
+    if (input_was_key_down('M') && input_is_key_up('M'))
+    {
+        KINFO("alloc_count: %llu", alloc_count);
+    }
+    
+
+    return true;
 }
 
 b8 game_render(game* game_inst, f32 delta_time) 
 {
-    return TRUE;
+    return true;
 }
 
 void game_on_resize(game* game_inst, u32 width, u32 height) 

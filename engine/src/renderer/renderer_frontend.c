@@ -17,10 +17,10 @@ b8 renderer_initialize(const char* application_name, struct platform_state* plat
 
     if (!backend->initialize(backend, application_name, plat_state)) {
         KFATAL("Renderer backend failed to initialize, Shutting down.");
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 void renderer_shutdown() {
     backend->shutdown(backend);
@@ -53,11 +53,11 @@ b8 renderer_draw_frame(render_packet* packet) {
 
         if (!result) {
             KERROR("renderer_end_frame() failed. Application shutting down...");
-            return FALSE;
+            return false;
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 void renderer_on_resized(u16 width, u16 height);

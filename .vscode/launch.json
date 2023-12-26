@@ -16,14 +16,15 @@
             "console":"externalTerminal"
         },
         {
-            "name": "(Linux) Launch",
-            "type": "cppdbg",
+            "name": "(Windows) Launch Unit Tests",
+            "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/testbed",
+            "program": "${workspaceFolder}/bin/tests.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/",
             "environment": [],
-        }
+            "console":"externalTerminal"
+        },
     ]
 }
