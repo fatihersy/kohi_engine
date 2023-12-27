@@ -19,6 +19,10 @@
 
 #include "platform/platform.h"
 
+// Shaders
+#include "shaders/vulkan_object_shader.h"
+
+// static Vulkan context
 static vulkan_context context;
 static u32 cached_framebuffer_width = 0;
 static u32 cached_framebuffer_height = 0;
@@ -35,10 +39,11 @@ void create_command_buffers(renderer_backend* backend);
 void regenerate_framebuffers(renderer_backend* backend, vulkan_swapchain* swapchain, vulkan_renderpass* renderpass);
 b8 recreate_swapchain(renderer_backend* backend);
 
-b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* application_name, struct platform_state* plat_state) {
+b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* application_name) {
+    // Function pointers
     context.find_memory_index = find_memory_index;
 
-    // TODO: Custom allocator.
+    // TODO: custom allocator.
     context.allocator = 0;
 
     application_get_framebuffer_size(&cached_framebuffer_width, &cached_framebuffer_height);
@@ -52,19 +57,20 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
     app_info.apiVersion = VK_API_VERSION_1_2;
     app_info.pApplicationName = application_name;
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    app_info.pEngineName = "fKohi Engine";
+    app_info.pEngineName = "Kohi Engine";
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 
     VkInstanceCreateInfo create_info = {VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
     create_info.pApplicationInfo = &app_info;
 
+    // Obtain a list of required extensions
     const char** required_extensions = darray_create(const char*);
-    darray_push(required_extensions, &VK_KHR_SURFACE_EXTENSION_NAME);
-    platform_get_required_extension_names(&required_extensions);
+    darray_push(required_extensions, &VK_KHR_SURFACE_EXTENSION_NAME);  // Generic surface extension
+    platform_get_required_extension_names(&required_extensions);       // Platform-specific extension(s)
 #if defined(_DEBUG)
-    darray_push(required_extensions, &VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    darray_push(required_extensions, &VK_EXT_DEBUG_UTILS_EXTENSION_NAME);  // debug utilities
 
-    KDEBUG("Required Extensions:");
+    KDEBUG("Required extensions:");
     u32 length = darray_length(required_extensions);
     for (u32 i = 0; i < length; ++i) {
         KDEBUG(required_extensions[i]);
@@ -74,7 +80,7 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
     create_info.enabledExtensionCount = darray_length(required_extensions);
     create_info.ppEnabledExtensionNames = required_extensions;
 
-    // Validation Layers
+    // Validation layers.
     const char** required_validation_layer_names = 0;
     u32 required_validation_layer_count = 0;
 
@@ -141,18 +147,20 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
 #endif
 
     // Surface
-    KDEBUG("Creating Vulkan Surface");
-    if (!platform_create_vulkan_surface(plat_state, &context)) {
+    KDEBUG("Creating Vulkan surface...");
+    if (!platform_create_vulkan_surface(&context)) {
         KERROR("Failed to create platform surface!");
         return false;
     }
     KDEBUG("Vulkan surface created.");
 
+    // Device creation
     if (!vulkan_device_create(&context)) {
         KERROR("Failed to create device!");
         return false;
     }
 
+    // Swapchain
     vulkan_swapchain_create(
         &context,
         context.framebuffer_width,
@@ -167,11 +175,11 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
         1.0f,
         0);
 
-    // Swapchain framebuffers
+    // Swapchain framebuffers.
     context.swapchain.framebuffers = darray_reserve(vulkan_framebuffer, context.swapchain.image_count);
     regenerate_framebuffers(backend, &context.swapchain, &context.main_renderpass);
 
-    // Create command buffers
+    // Create command buffers.
     create_command_buffers(backend);
 
     // Create sync objects.
@@ -197,6 +205,14 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
     for (u32 i = 0; i < context.swapchain.image_count; ++i) {
         context.images_in_flight[i] = 0;
     }
+
+    // Create Builtin shaders
+    if (!vulkan_object_shader_create(&context, &context.object_shader))
+    {
+        KERROR("Error loading built-in basic_lighting shader.");
+        return false;
+    }
+    
 
     KINFO("Vulkan renderer initialized successfully.");
     return true;
@@ -270,19 +286,21 @@ void vulkan_renderer_backend_shutdown(renderer_backend* backend) {
         context.surface = 0;
     }
 
+#if defined(_DEBUG)
     KDEBUG("Destroying Vulkan debugger...");
     if (context.debug_messenger) {
         PFN_vkDestroyDebugUtilsMessengerEXT func =
             (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(context.instance, "vkDestroyDebugUtilsMessengerEXT");
         func(context.instance, context.debug_messenger, context.allocator);
     }
+#endif
 
     KDEBUG("Destroying Vulkan instance...");
     vkDestroyInstance(context.instance, context.allocator);
 }
 
 void vulkan_renderer_backend_on_resized(renderer_backend* backend, u16 width, u16 height) {
-    // Update "framebuffer size generation", a counter which indicates when the
+    // Update the "framebuffer size generation", a counter which indicates when the
     // framebuffer size has been updated.
     cached_framebuffer_width = width;
     cached_framebuffer_height = height;
@@ -294,14 +312,13 @@ void vulkan_renderer_backend_on_resized(renderer_backend* backend, u16 width, u1
 b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time) {
     vulkan_device* device = &context.device;
 
-    // Check if recreating swapchain and boot out.
+    // Check if recreating swap chain and boot out.
     if (context.recreating_swapchain) {
         VkResult result = vkDeviceWaitIdle(device->logical_device);
         if (!vulkan_result_is_success(result)) {
-            KERROR("vulkan_renderer_backend_begin_frame::vkDeviceWaitIdle (1) failed: '%s'", vulkan_result_string(result, true));
+            KERROR("vulkan_renderer_backend_begin_frame vkDeviceWaitIdle (1) failed: '%s'", vulkan_result_string(result, true));
             return false;
         }
-
         KINFO("Recreating swapchain, booting.");
         return false;
     }
@@ -324,7 +341,7 @@ b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time
         return false;
     }
 
-    // Wait for the execution of the current frame to complete. The fence being free will allow this one to  move on.
+    // Wait for the execution of the current frame to complete. The fence being free will allow this one to move on.
     if (!vulkan_fence_wait(
             &context,
             &context.in_flight_fences[context.current_frame],
@@ -381,6 +398,7 @@ b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time
 }
 
 b8 vulkan_renderer_backend_end_frame(renderer_backend* backend, f32 delta_time) {
+
     vulkan_command_buffer* command_buffer = &context.graphics_command_buffers[context.image_index];
 
     // End renderpass
@@ -446,13 +464,15 @@ b8 vulkan_renderer_backend_end_frame(renderer_backend* backend, f32 delta_time) 
         context.queue_complete_semaphores[context.current_frame],
         context.image_index);
 
+
     return true;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-                                                 VkDebugUtilsMessageTypeFlagsEXT message_types,
-                                                 const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-                                                 void* user_data) {
+VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+    VkDebugUtilsMessageTypeFlagsEXT message_types,
+    const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+    void* user_data) {
     switch (message_severity) {
         default:
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:

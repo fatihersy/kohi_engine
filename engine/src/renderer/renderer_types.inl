@@ -8,12 +8,10 @@ typedef enum renderer_backend_type {
     RENDERER_BACKEND_TYPE_DIRECTX
 }renderer_backend_type;
 
-typedef struct renderer_backend
-{
-    struct platform_state* plat_state;
+typedef struct renderer_backend {
     u64 frame_number;
 
-    b8 (*initialize) (struct renderer_backend* backend, const char* application_name, struct platform_state* plat_state);
+    b8 (*initialize) (struct renderer_backend* backend, const char* application_name);
 
     void (*shutdown) (struct renderer_backend* backend);
 

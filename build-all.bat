@@ -15,16 +15,15 @@ ECHO "Building everything..."
 @REM IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
 
 REM Engine
-make -f "makefile.engine.windows.mak" all
+make -f "Makefile.engine.windows.mak" all
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
 
 REM Testbed
-make -f "makefile.testbed.windows.mak" all
+make -f "Makefile.testbed.windows.mak" all
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
 
 REM Tests
-make -f "makefile.tests.windows.mak" all
+make -f "Makefile.tests.windows.mak" all
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
-
 
 ECHO "All assemblies built successfully."

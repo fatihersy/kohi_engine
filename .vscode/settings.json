@@ -1,11 +1,37 @@
 {
-    "workbench.iconTheme": "vscode-great-icons",
     "workbench.colorTheme": "Default Dark+",
     "editor.minimap.enabled": false,
-    "editor.fontFamily": "IBM Plex Mono",
+    "files.autoSave": "onFocusChange",
+    "terminal.integrated.defaultProfile.windows": "pwsh7",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        },
+        "pwsh7": {
+            "path": "c:/Program Files/PowerShell/7/pwsh.exe"
+        }
+    },
+    "editor.fontFamily": "Fira Code Retina",
+    "editor.fontSize": 15,
+    "editor.fontLigatures": true,
     "terminal.integrated.fontFamily": "IBM Plex Mono",
     "workbench.editor.showTabs": "multiple",
-    "files.autoSave": "onFocusChange",
+    "workbench.colorCustomizations": {
+        "editorCursor.foreground": "#00ff33",
+        "editor.lineHighlightBackground": "#111144"
+    },
     "workbench.statusBar.visible": true,
     "editor.lineNumbers": "on",
     "C_Cpp.clang_format_style": "{ BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 0, NamespaceIndentation: All}",
@@ -22,17 +48,26 @@
     "todohighlight.keywords": [
         {
             "text": "TODO:",
-            "color": "yellow",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(255,189,42,0.8)"
+            "color": "red",
+            "backgroundColor": "rgba(0,0,0,0)"
         },
         {
-            "text": "FIXME",
-            "color": "red",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(240,98,146,0.8)"
+            "text": "HACK:",
+            "color": "#ff6600",
+            "backgroundColor": "rgba(0,0,0,0)"
+        },
+        {
+            "text": "NOTE:",
+            "color": "green",
+            "backgroundColor": "rgba(0,0,0,0)"
         }
     ],
+    "todohighlight.defaultStyle": {
+        "color": "red",
+        "backgroundColor": "#ffab00",
+        "overviewRulerColor": "rgba(0,0,0,0)",
+        "isWholeLine": false,
+    },
     "files.associations": {
         "test.h": "c",
         "vulkan.h": "c",
@@ -47,7 +82,10 @@
         "tuple": "cpp",
         "utility": "cpp",
         "kmemory.h": "c",
-        "defines.h": "c"
-    },
-    "C_Cpp.errorSquiggles": "enabledIfIncludesResolve"
+        "defines.h": "c",
+        "vulkan_types.inl": "c",
+        "clock.h": "c",
+        "kstring.h": "c",
+        "logger.h": "c"
+    }
 }

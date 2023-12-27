@@ -2,11 +2,9 @@
 
 #include "defines.h"
 
-typedef struct event_context
-{
+typedef struct event_context {
     // 128 bytes
-    union
-    {
+    union {
         i64 i64[2];
         u64 u64[2];
         f64 f64[2];
@@ -17,20 +15,19 @@ typedef struct event_context
 
         i16 i16[8];
         u16 u16[8];
-        
+
         i8 i8[16];
         u8 u8[16];
 
         char c[16];
     } data;
-    
 } event_context;
 
-// Should return true if handled
+// Should return true if handled.
 typedef b8 (*PFN_on_event)(u16 code, void* sender, void* listener_inst, event_context data);
 
-b8 event_initialize();
-void event_shutdown();
+void event_system_initialize();
+void event_system_shutdown();
 
 /**
  * Register to listen for when events are sent with the provided code. Events with duplicate
@@ -113,4 +110,3 @@ typedef enum system_event_code {
 
     MAX_EVENT_CODE = 0xFF
 } system_event_code;
-
