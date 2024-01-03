@@ -5,10 +5,21 @@
 
 #include <vulkan/vulkan.h>
 
+// Checks the given expression's return value against VK_SUCCESS.
 #define VK_CHECK(expr)               \
     {                                \
         KASSERT(expr == VK_SUCCESS); \
     }
+
+typedef struct vulkan_buffer {
+    u64 total_size;
+    VkBuffer handle;
+    VkBufferUsageFlagBits usage;
+    b8 is_locked;
+    VkDeviceMemory memory;
+    i32 memory_index;
+    u32 memory_property_flags;
+} vulkan_buffer;
 
 typedef struct vulkan_swapchain_support_info {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -35,6 +46,7 @@ typedef struct vulkan_device {
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
     VkPhysicalDeviceMemoryProperties memory;
+
     VkFormat depth_format;
 } vulkan_device;
 
@@ -114,14 +126,12 @@ typedef struct vulkan_shader_stage {
     VkPipelineShaderStageCreateInfo shader_stage_create_info;
 } vulkan_shader_stage;
 
-typedef struct vulkan_pipeline
-{
+typedef struct vulkan_pipeline {
     VkPipeline handle;
     VkPipelineLayout pipeline_layout;
 } vulkan_pipeline;
 
 #define OBJECT_SHADER_STAGE_COUNT 2
-
 typedef struct vulkan_object_shader {
     // vertex, fragment
     vulkan_shader_stage stages[OBJECT_SHADER_STAGE_COUNT];
@@ -132,18 +142,19 @@ typedef struct vulkan_object_shader {
 } vulkan_object_shader;
 
 typedef struct vulkan_context {
-    // The framebuffer's current width
+
+    // The framebuffer's current width.
     u32 framebuffer_width;
 
-    // The framebuffer's current height
+    // The framebuffer's current height.
     u32 framebuffer_height;
 
     // Current generation of framebuffer size. If it does not match framebuffer_size_last_generation,
     // a new one should be generated.
     u64 framebuffer_size_generation;
 
-    // The generation of the framebuffer when it was last created. Set the framebuffer_size_generation
-    // When updated.
+    // The generation of the framebuffer when it was last created. Set to framebuffer_size_generation
+    // when updated.
     u64 framebuffer_size_last_generation;
 
     VkInstance instance;
@@ -158,6 +169,9 @@ typedef struct vulkan_context {
 
     vulkan_swapchain swapchain;
     vulkan_renderpass main_renderpass;
+
+    vulkan_buffer object_vertex_buffer;
+    vulkan_buffer object_index_buffer;
 
     // darray
     vulkan_command_buffer* graphics_command_buffers;
@@ -181,5 +195,9 @@ typedef struct vulkan_context {
 
     vulkan_object_shader object_shader;
 
+    u64 geometry_vertex_offset;
+    u64 geometry_index_offset;
+
     i32 (*find_memory_index)(u32 type_filter, u32 property_flags);
+
 } vulkan_context;
