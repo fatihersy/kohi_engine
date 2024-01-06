@@ -239,17 +239,19 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
     vertex_3d verts[vert_count];
     kzero_memory(verts, sizeof(vertex_3d) * vert_count);
 
-    verts[0].position.x = 0.0;
-    verts[0].position.y = -0.5;
+    const f32 f = 10.f;
 
-    verts[1].position.x = 0.5;
-    verts[1].position.y = 0.5;
+    verts[0].position.x = -0.5 * f;
+    verts[0].position.y = -0.5 * f;
 
-    verts[2].position.x = 0;
-    verts[2].position.y = 0.5;
+    verts[1].position.x =  0.5 * f;
+    verts[1].position.y =  0.5 * f;
 
-    verts[3].position.x = 0.5;
-    verts[3].position.y = -0.5;
+    verts[2].position.x = -0.5 * f;
+    verts[2].position.y =  0.5 * f;
+
+    verts[3].position.x =  0.5 * f;
+    verts[3].position.y = -0.5 * f;
 
     const u32 index_count = 6;
     u32 indices[index_count] = {0, 1, 2, 0, 3, 1};
@@ -394,7 +396,7 @@ b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time
     if (!vulkan_fence_wait(
             &context,
             &context.in_flight_fences[context.current_frame],
-            UINT64_MAX)) {
+            0xffffffffffffffffull)) {
         KWARN("In-flight fence wait failure!");
         return false;
     }
@@ -404,7 +406,7 @@ b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time
     if (!vulkan_swapchain_acquire_next_image_index(
             &context,
             &context.swapchain,
-            UINT64_MAX,
+            0xffffffffffffffffull,
             context.image_available_semaphores[context.current_frame],
             0,
             &context.image_index)) {
@@ -443,6 +445,21 @@ b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time
         &context.main_renderpass,
         context.swapchain.framebuffers[context.image_index].handle);
 
+    return true;
+}
+
+void vulkan_renderer_update_global_state(mat4 projection, mat4 view, vec3 view_position, vec4 ambient_color, i32 mode) {
+    vulkan_command_buffer* command_buffer = &context.graphics_command_buffers[context.image_index];
+
+    vulkan_object_shader_use(&context, &context.object_shader);
+
+    context.object_shader.global_ubo.projection = projection;
+    context.object_shader.global_ubo.view = view;
+
+    // TODO: other ubo properties.
+
+    vulkan_object_shader_update_global_state(&context, &context.object_shader);
+
     // TODO: temporary test code
     vulkan_object_shader_use(&context, &context.object_shader);
 
@@ -456,8 +473,6 @@ b8 vulkan_renderer_backend_begin_frame(renderer_backend* backend, f32 delta_time
     // Issue the draw.
     vkCmdDrawIndexed(command_buffer->handle, 6, 1, 0, 0, 0);
     // TODO: end temporary test code
-
-    return true;
 }
 
 b8 vulkan_renderer_backend_end_frame(renderer_backend* backend, f32 delta_time) {
@@ -473,7 +488,7 @@ b8 vulkan_renderer_backend_end_frame(renderer_backend* backend, f32 delta_time) 
         vulkan_fence_wait(
             &context,
             context.images_in_flight[context.image_index],
-            UINT64_MAX);
+            0xffffffffffffffffull);
     }
 
     // Mark the image fence as in-use by this frame.

@@ -16,7 +16,7 @@ void vulkan_command_buffer_free(
 void vulkan_command_buffer_begin(
     vulkan_command_buffer* command_buffer,
     b8 is_single_use,
-    b8 is_render_pass_continue,
+    b8 is_renderpass_continue,
     b8 is_simultaneous_use);
 
 void vulkan_command_buffer_end(vulkan_command_buffer* command_buffer);

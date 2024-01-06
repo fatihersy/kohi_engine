@@ -98,8 +98,8 @@ b8 vulkan_device_create(vulkan_context* context) {
 
     u32 extension_count = portability_required ? 2 : 1;
     const char** extension_names = portability_required
-                                       ? (const char* [2]){VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset"}
-                                       : (const char* [1]){VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+        ? (const char* [2]) { VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset" }
+        : (const char* [1]) { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     VkDeviceCreateInfo device_create_info = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
     device_create_info.queueCreateInfoCount = index_count;
     device_create_info.pQueueCreateInfos = queue_create_infos;
@@ -304,11 +304,11 @@ b8 select_physical_device(vulkan_context* context) {
         // NOTE: Enable this if compute will be required.
         // requirements.compute = true;
         requirements.sampler_anisotropy = true;
-#if KPLATFORM_APPLE
+    #if KPLATFORM_APPLE
         requirements.discrete_gpu = false;
-#else
+    #else
         requirements.discrete_gpu = true;
-#endif
+    #endif
         requirements.device_extension_names = darray_create(const char*);
         darray_push(requirements.device_extension_names, &VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 

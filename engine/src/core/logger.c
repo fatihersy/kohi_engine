@@ -16,11 +16,11 @@ static logger_system_state* state_ptr;
 
 void append_to_log_file(const char* message) {
     if (state_ptr && state_ptr->log_file_handle.is_valid) {
-        // Since the message already contains a '/n', just write the bytes directly.
+        // Since the message already contains a '\n', just write the bytes directly.
         u64 length = string_length(message);
         u64 written = 0;
         if (!filesystem_write(&state_ptr->log_file_handle, length, message, &written)) {
-            platform_console_write_error("Error writing the console.log.", LOG_LEVEL_ERROR);
+            platform_console_write_error("ERROR writing to console.log.", LOG_LEVEL_ERROR);
         }
     }
 }
@@ -39,15 +39,24 @@ b8 initialize_logging(u64* memory_requirement, void* state) {
         return false;
     }
 
+    // TODO: Remove this
+    KFATAL("A test message: %f", 3.14f);
+    KERROR("A test message: %f", 3.14f);
+    KWARN("A test message: %f", 3.14f);
+    KINFO("A test message: %f", 3.14f);
+    KDEBUG("A test message: %f", 3.14f);
+    KTRACE("A test message: %f", 3.14f);
+
+    // TODO: create log file.
     return true;
 }
 
-void shutdown_logging() {
-    // TODO: cleanup logging/writing queued entries.
+void shutdown_logging(void* state) {
+    // TODO: cleanup logging/write queued entries.
     state_ptr = 0;
 }
 
-KAPI void log_output(log_level level, const char* message, ...) {
+void log_output(log_level level, const char* message, ...) {
     // TODO: These string operations are all pretty slow. This needs to be
     // moved to another thread eventually, along with the file writes, to
     // avoid slowing things down while the engine is trying to run.
@@ -77,7 +86,8 @@ KAPI void log_output(log_level level, const char* message, ...) {
     } else {
         platform_console_write(out_message, level);
     }
-
+    
+    // Queue a copy to be written to the log file.
     append_to_log_file(out_message);
 }
 

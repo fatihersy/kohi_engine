@@ -60,7 +60,6 @@ b8 filesystem_read_line(file_handle* handle, char** line_buf) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -68,7 +67,7 @@ b8 filesystem_write_line(file_handle* handle, const char* text) {
     if (handle->handle) {
         i32 result = fputs(text, (FILE*)handle->handle);
         if (result != EOF) {
-            result = fputs("\n", (FILE*)handle->handle);
+            result = fputc('\n', (FILE*)handle->handle);
         }
 
         // Make sure to flush the stream so it is written to the file immediately.
@@ -79,7 +78,7 @@ b8 filesystem_write_line(file_handle* handle, const char* text) {
     return false;
 }
 
-KAPI b8 filesystem_read(file_handle* handle, u64 data_size, void* out_data, u64* out_bytes_read) {
+b8 filesystem_read(file_handle* handle, u64 data_size, void* out_data, u64* out_bytes_read) {
     if (handle->handle && out_data) {
         *out_bytes_read = fread(out_data, 1, data_size, (FILE*)handle->handle);
         if (*out_bytes_read != data_size) {
@@ -90,7 +89,7 @@ KAPI b8 filesystem_read(file_handle* handle, u64 data_size, void* out_data, u64*
     return false;
 }
 
-KAPI b8 filesystem_read_all_bytes(file_handle* handle, u8** out_bytes, u64* out_bytes_read) {
+b8 filesystem_read_all_bytes(file_handle* handle, u8** out_bytes, u64* out_bytes_read) {
     if (handle->handle) {
         // File size
         fseek((FILE*)handle->handle, 0, SEEK_END);
@@ -107,7 +106,7 @@ KAPI b8 filesystem_read_all_bytes(file_handle* handle, u8** out_bytes, u64* out_
     return false;
 }
 
-KAPI b8 filesystem_write(file_handle* handle, u64 data_size, const void* data, u64* out_bytes_written) {
+b8 filesystem_write(file_handle* handle, u64 data_size, const void* data, u64* out_bytes_written) {
     if (handle->handle) {
         *out_bytes_written = fwrite(data, 1, data_size, (FILE*)handle->handle);
         if (*out_bytes_written != data_size) {

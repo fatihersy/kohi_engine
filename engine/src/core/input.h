@@ -2,8 +2,7 @@
 
 #include "defines.h"
 
-typedef enum buttons 
-{
+typedef enum buttons {
     BUTTON_LEFT,
     BUTTON_RIGHT,
     BUTTON_MIDDLE,
@@ -146,7 +145,7 @@ typedef enum keys {
 /**
  * @brief Initializes the input system. Call twice; once to obtain memory requirement (passing
  * state = 0), then a second time passing allocated memory to state.
- * 
+ *
  * @param memory_requirement The required size of the state memory.
  * @param state Either 0 or the allocated block of state memory.
  */

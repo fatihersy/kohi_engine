@@ -12,8 +12,7 @@ b8 create_shader_module(
     const char* type_str,
     VkShaderStageFlagBits shader_stage_flag,
     u32 stage_index,
-    vulkan_shader_stage* shader_stages)
-{
+    vulkan_shader_stage* shader_stages) {
     // Build file name.
     char file_name[512];
     string_format(file_name, "assets/shaders/%s.%s.spv", name, type_str);
@@ -23,8 +22,7 @@ b8 create_shader_module(
 
     // obtain file handle
     file_handle handle;
-    if (!filesystem_open(file_name, FILE_MODE_READ, true, &handle))
-    {
+    if (!filesystem_open(file_name, FILE_MODE_READ, true, &handle)) {
         KERROR("Unable to read shader module: %s.", file_name);
         return false;
     }
@@ -32,8 +30,7 @@ b8 create_shader_module(
     // Read the entire file as binary
     u64 size = 0;
     u8* file_buffer = 0;
-    if (!filesystem_read_all_bytes(&handle, &file_buffer, &size))
-    {
+    if (!filesystem_read_all_bytes(&handle, &file_buffer, &size)) {
         KERROR("Unable to binary read shader module: %s.", file_name);
         return false;
     }
@@ -49,12 +46,12 @@ b8 create_shader_module(
         &shader_stages[stage_index].create_info,
         context->allocator,
         &shader_stages[stage_index].handle));
-    
+
     kzero_memory(&shader_stages[stage_index].shader_stage_create_info, sizeof(VkPipelineShaderStageCreateInfo));
     shader_stages[stage_index].shader_stage_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     shader_stages[stage_index].shader_stage_create_info.stage = shader_stage_flag;
     shader_stages[stage_index].shader_stage_create_info.module = shader_stages[stage_index].handle;
     shader_stages[stage_index].shader_stage_create_info.pName = "main";
-    
+
     return true;
 }
