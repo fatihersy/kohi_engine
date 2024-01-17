@@ -9,7 +9,7 @@
 // HACK: This should not be available outside the engine.
 #include <renderer/renderer_frontend.h>
 
-void recalculate_camera_view_matrix(game_state* state) {
+void recalculate_view_matrix(game_state* state) {
     if (state->camera_view_dirty) {
         mat4 rotation = mat4_euler_xyz(state->camera_euler.x, state->camera_euler.y, state->camera_euler.z);
         mat4 translation = mat4_translation(state->camera_position);
@@ -105,7 +105,7 @@ b8 game_update(game* game_inst, f32 delta_time) {
     }
     
 
-    recalculate_camera_view_matrix(state);
+    recalculate_view_matrix(state);
 
     // HACK: This should not be available outside the engine.
     renderer_set_view(state->view);

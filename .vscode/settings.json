@@ -25,7 +25,7 @@
     },
     "editor.fontFamily": "Fira Code Retina",
     "editor.fontSize": 15,
-    "editor.fontLigatures": true,
+    "editor.fontLigatures": "'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'zero', 'cv14', 'cv01', 'cv30', 'cv31'",
     "terminal.integrated.fontFamily": "IBM Plex Mono",
     "workbench.editor.showTabs": "multiple",
     "workbench.colorCustomizations": {
@@ -86,6 +86,7 @@
         "vulkan_types.inl": "c",
         "clock.h": "c",
         "kstring.h": "c",
-        "logger.h": "c"
+        "logger.h": "c",
+        "math_types.h": "c"
     }
 }
