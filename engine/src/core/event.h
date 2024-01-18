@@ -50,7 +50,7 @@ KAPI b8 event_register(u16 code, void* listener, PFN_on_event on_event);
 KAPI b8 event_unregister(u16 code, void* listener, PFN_on_event on_event);
 
 /**
- * Fires an event to listeners of the given code. If an event handler returns 
+ * Fires an event to listeners of the given code. If an event handler returns
  * true, the event is considered handled and is not passed on to any more listeners.
  * @param code The event code to fire.
  * @param sender A pointer to the sender. Can be 0/NULL.
@@ -107,6 +107,12 @@ typedef enum system_event_code {
      * u16 height = data.data.u16[1];
      */
     EVENT_CODE_RESIZED = 0x08,
+
+    EVENT_CODE_DEBUG0 = 0x10,
+    EVENT_CODE_DEBUG1 = 0x11,
+    EVENT_CODE_DEBUG2 = 0x12,
+    EVENT_CODE_DEBUG3 = 0x13,
+    EVENT_CODE_DEBUG4 = 0x14,
 
     MAX_EVENT_CODE = 0xFF
 } system_event_code;
